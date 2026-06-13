@@ -122,6 +122,66 @@ nav{position:sticky;top:0;z-index:100;background:rgba(13,13,13,.96);backdrop-fil
   cursor:pointer;font-family:var(--fd);transition:background .2s}
 .product-footer .btn-sm:hover{background:var(--yellow-dark)}
 /* ── CTA BANNER ── */
+/* ── PROMO CALCULADORA ── */
+.calc-promo{margin:0 32px 40px;border-radius:12px;overflow:hidden;
+  display:grid;grid-template-columns:1fr auto;align-items:center;
+  background:var(--g900);border:1.5px solid var(--g700);position:relative}
+.calc-promo::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(110deg,rgba(245,196,0,.06) 0%,transparent 60%);
+  pointer-events:none}
+.calc-promo-body{padding:36px 40px}
+.calc-promo-tag{display:inline-flex;align-items:center;gap:7px;
+  background:rgba(245,196,0,.12);border:1px solid rgba(245,196,0,.3);
+  border-radius:20px;padding:5px 13px;margin-bottom:14px}
+.calc-promo-tag span{font-size:.68rem;font-weight:800;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--yellow)}
+.calc-promo-tag svg{width:13px;height:13px;color:var(--yellow)}
+.calc-promo h2{font-family:var(--fd);font-weight:900;font-size:clamp(1.6rem,3vw,2.4rem);
+  color:var(--white);line-height:1.1;margin-bottom:10px;text-transform:uppercase}
+.calc-promo h2 em{color:var(--yellow);font-style:normal}
+.calc-promo p{font-size:.92rem;color:var(--g300);line-height:1.6;max-width:480px;margin-bottom:24px}
+.calc-promo-steps{display:flex;gap:20px;margin-bottom:26px;flex-wrap:wrap}
+.calc-promo-step{display:flex;align-items:center;gap:8px}
+.calc-promo-step-num{width:22px;height:22px;border-radius:50%;background:var(--yellow);
+  color:var(--black);font-family:var(--fd);font-weight:800;font-size:.72rem;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.calc-promo-step span{font-size:.8rem;color:var(--g300)}
+.calc-promo-btn{display:inline-flex;align-items:center;gap:10px;
+  background:var(--yellow);color:var(--black);
+  font-family:var(--fd);font-weight:800;font-size:.95rem;letter-spacing:.06em;
+  text-transform:uppercase;padding:14px 28px;border-radius:8px;border:none;
+  cursor:pointer;transition:all .18s;text-decoration:none}
+.calc-promo-btn:hover{background:var(--yellow-dark);transform:translateY(-1px);
+  box-shadow:0 6px 24px rgba(245,196,0,.3)}
+.calc-promo-btn svg{width:18px;height:18px;transition:transform .18s}
+.calc-promo-btn:hover svg{transform:translateX(4px)}
+.calc-promo-visual{padding:32px 40px 32px 0;display:flex;align-items:center}
+.calc-promo-mockup{background:var(--g800);border:1.5px solid var(--g700);
+  border-radius:10px;padding:16px;width:200px;flex-shrink:0}
+.calc-promo-mockup-title{font-size:.62rem;font-weight:800;letter-spacing:.14em;
+  color:var(--g400);text-transform:uppercase;margin-bottom:12px}
+.calc-promo-chip-row{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.calc-promo-chip{background:var(--g700);border:1px solid var(--g600);border-radius:5px;
+  padding:5px 8px;font-size:.62rem;font-weight:700;color:var(--g200);text-transform:uppercase}
+.calc-promo-chip.hi{background:rgba(245,196,0,.15);border-color:var(--yellow);
+  color:var(--yellow)}
+.calc-promo-result{margin-top:10px;padding-top:10px;border-top:1px solid var(--g700)}
+.calc-promo-result-row{display:flex;justify-content:space-between;align-items:center;
+  padding:3px 0}
+.calc-promo-result-name{font-size:.6rem;color:var(--g400)}
+.calc-promo-result-qty{font-family:var(--fd);font-weight:800;font-size:.75rem;color:var(--yellow)}
+@media(max-width:860px){
+  .calc-promo{grid-template-columns:1fr;margin:0 20px 32px}
+  .calc-promo-visual{display:none}
+  .calc-promo-body{padding:28px 24px}
+}
+@media(max-width:640px){
+  .calc-promo{margin:0 12px 28px}
+  .calc-promo-body{padding:24px 18px}
+  .calc-promo h2{font-size:1.5rem}
+  .calc-promo-steps{gap:12px}
+}
+
 .cta-banner{margin:0 32px 60px;padding:40px 36px;
   background:linear-gradient(120deg,var(--yellow) 0%,var(--yellow-dark) 100%);
   border-radius:4px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
@@ -622,6 +682,85 @@ input,select,textarea{font-size:16px}
       </div>
     </div>
   </div>
+  <!-- ── PROMO CALCULADORA ── -->
+  <div class="calc-promo">
+    <div class="calc-promo-body">
+      <div class="calc-promo-tag">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <rect x="4" y="2" width="16" height="20" rx="2"/>
+          <line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/>
+          <line x1="8" y1="15" x2="12" y2="15"/>
+        </svg>
+        <span>Herramienta gratuita</span>
+      </div>
+      <h2>CALCULÁ LOS <em>MATERIALES</em><br>DE TU OBRA</h2>
+      <p>Seleccioná el sistema, ingresá las medidas y en segundos obtenés la lista exacta de materiales con cantidades. Sin errores, sin desperdicios.</p>
+      <div class="calc-promo-steps">
+        <div class="calc-promo-step">
+          <div class="calc-promo-step-num">1</div>
+          <span>Elegí el sistema</span>
+        </div>
+        <div class="calc-promo-step">
+          <div class="calc-promo-step-num">2</div>
+          <span>Ingresá medidas</span>
+        </div>
+        <div class="calc-promo-step">
+          <div class="calc-promo-step-num">3</div>
+          <span>Obtené materiales</span>
+        </div>
+        <div class="calc-promo-step">
+          <div class="calc-promo-step-num">4</div>
+          <span>Cotizá por WhatsApp</span>
+        </div>
+      </div>
+      <button class="calc-promo-btn" onclick="showPage('calculadora')">
+        Probá la calculadora
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+    <!-- Mockup decorativo -->
+    <div class="calc-promo-visual">
+      <div class="calc-promo-mockup">
+        <div class="calc-promo-mockup-title">Calculadora</div>
+        <div class="calc-promo-chip-row">
+          <div class="calc-promo-chip hi">Drywall</div>
+          <div class="calc-promo-chip">Steel</div>
+        </div>
+        <div class="calc-promo-chip-row">
+          <div class="calc-promo-chip hi">Pared Int.</div>
+          <div class="calc-promo-chip">Cielorraso</div>
+        </div>
+        <div class="calc-promo-chip-row">
+          <div class="calc-promo-chip hi">Amb. Seco</div>
+        </div>
+        <div class="calc-promo-chip-row">
+          <div class="calc-promo-chip hi">Ninguna</div>
+          <div class="calc-promo-chip">Acústica</div>
+        </div>
+        <div class="calc-promo-result">
+          <div class="calc-promo-result-row">
+            <span class="calc-promo-result-name">Placa Estándar 12.5mm</span>
+            <span class="calc-promo-result-qty">14 un</span>
+          </div>
+          <div class="calc-promo-result-row">
+            <span class="calc-promo-result-name">Perfil Montante 70mm</span>
+            <span class="calc-promo-result-qty">23 un</span>
+          </div>
+          <div class="calc-promo-result-row">
+            <span class="calc-promo-result-name">Tornillo T2</span>
+            <span class="calc-promo-result-qty">600 un</span>
+          </div>
+          <div class="calc-promo-result-row">
+            <span class="calc-promo-result-name">Masilla para interior</span>
+            <span class="calc-promo-result-qty">36 kg</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="cta-banner">
     <div><h3>¿NECESITÁS UN PRESUPUESTO?</h3><p>Respondemos rápido. Entrega en obra disponible para Zona Norte.</p></div>
     <button class="btn-dark" onclick="openContact()">Consultar ahora</button>
