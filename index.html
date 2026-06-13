@@ -161,6 +161,52 @@ footer{background:var(--g900);border-top:1px solid var(--g700);padding:40px 32px
   border:1px solid var(--g700);border-radius:4px;color:var(--g400);cursor:pointer;
   font-size:.85rem;transition:border-color .2s,color .2s}
 .modal-close:hover{border-color:var(--white);color:var(--white)}
+/* ── BOTÓN FLOTANTE WHATSAPP ── */
+.wsp-float{
+  position:fixed;bottom:24px;right:24px;z-index:1000;
+  display:flex;align-items:center;gap:0;
+  cursor:pointer;text-decoration:none;
+}
+.wsp-float-btn{
+  width:56px;height:56px;border-radius:50%;
+  background:#25D366;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px rgba(37,211,102,.45);
+  transition:transform .2s,box-shadow .2s;
+  flex-shrink:0;
+}
+.wsp-float:hover .wsp-float-btn{
+  transform:scale(1.1);
+  box-shadow:0 6px 28px rgba(37,211,102,.6);
+}
+.wsp-float-label{
+  background:#1a1a1a;color:#fff;
+  font-family:var(--fd);font-weight:700;font-size:.78rem;
+  letter-spacing:.04em;
+  padding:8px 14px;border-radius:20px 0 0 20px;
+  white-space:nowrap;
+  max-width:0;overflow:hidden;
+  transition:max-width .3s ease, padding .3s ease, opacity .3s;
+  opacity:0;
+  border:1px solid #333;border-right:none;
+  margin-right:-6px;
+}
+.wsp-float:hover .wsp-float-label{
+  max-width:160px;opacity:1;padding:8px 14px;
+}
+/* Pulso animado */
+.wsp-float-btn::after{
+  content:'';position:absolute;
+  width:56px;height:56px;border-radius:50%;
+  border:3px solid #25D366;
+  animation:wsp-pulse 2s ease-out infinite;
+  opacity:0;
+}
+@keyframes wsp-pulse{
+  0%{transform:scale(1);opacity:.6}
+  100%{transform:scale(1.7);opacity:0}
+}
+
 /* ── TOAST ── */
 .toast{position:fixed;bottom:24px;right:24px;z-index:9999;
   background:var(--yellow);color:var(--black);font-family:var(--fd);font-weight:700;
@@ -1152,6 +1198,9 @@ function applyContact(){
   el('footer-email').href = 'mailto:'+c.email;
   el('footer-ig').href = c.ig||'#';
   el('footer-ig').textContent = c.ig_label||'Instagram';
+  // Botón flotante WSP
+  const wspBtn = document.getElementById('wspFloat');
+  if(wspBtn) wspBtn.href = 'https://wa.me/'+(c.wsp||'5491100000000');
   // nav social icons
   const nav = el('nav-social-icons');
   if(nav){
@@ -2277,5 +2326,15 @@ document.addEventListener('DOMContentLoaded',()=>{
   el('cat-btn-drywall').classList.add('save-btn');
 });
 </script>
+<!-- ── BOTÓN FLOTANTE WHATSAPP ── -->
+<a class="wsp-float" id="wspFloat" href="#" target="_blank" aria-label="Contactar por WhatsApp">
+  <span class="wsp-float-label">¡Consultanos!</span>
+  <div class="wsp-float-btn">
+    <svg width="30" height="30" viewBox="0 0 32 32" fill="white">
+      <path d="M16 3C9 3 3.3 8.7 3.3 15.7c0 2.3.6 4.5 1.7 6.4L3 29l7.2-1.9c1.8 1 3.8 1.5 5.8 1.5C23 28.6 28.7 22.9 28.7 16S23 3.4 16 3.4Zm0 23.2c-2 0-3.9-.5-5.6-1.5l-.4-.2-4.3 1.1 1.1-4.2-.3-.4a11 11 0 0 1-1.7-5.9C4.8 9.4 9.8 4.4 16 4.4s11.2 5 11.2 11.2-5 11.2-11.2 11.2Zm6.1-8.4c-.3-.2-1.9-.9-2.2-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7.1a9 9 0 0 1-2.6-1.6 9.7 9.7 0 0 1-1.8-2.2c-.2-.4 0-.5.2-.7l.5-.6.3-.6v-.6l-1-2.4c-.3-.6-.6-.5-.8-.5h-.7c-.2 0-.6.1-.9.5s-1.2 1.2-1.2 2.9 1.2 3.4 1.4 3.6 2.4 3.7 5.9 5.1c.8.4 1.5.6 2 .7.8.3 1.6.2 2.2.1.7-.1 2-.8 2.3-1.6.3-.8.3-1.4.2-1.6-.1-.1-.4-.2-.7-.4Z"/>
+    </svg>
+  </div>
+</a>
+
 </body>
 </html>
