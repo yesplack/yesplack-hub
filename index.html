@@ -1698,15 +1698,16 @@ function initDragPreview(){
   const preview = el('imgDragPreview');
   const inner = el('imgDragInner');
   const img = el('imgDragImg');
-  if(!preview||!inner||!img) return;
+  if(!preview||!inner||!img||!img.naturalWidth) return;
 
   const pw = preview.offsetWidth;
   const ph = preview.offsetHeight;
-  const scale = _imgZoom / 100;
-  const iw = img.naturalWidth  * scale * (ph / img.naturalHeight);
-  const ih = ph;
-  // Escalar para que la imagen cubra el preview en alto
-  const finalScale = Math.max(pw / img.naturalWidth, ph / img.naturalHeight) * (_imgZoom/100);
+
+  // Escala base: la imagen siempre cubre TODO el preview (como object-fit:cover)
+  const baseScale = Math.max(pw / img.naturalWidth, ph / img.naturalHeight);
+  // El zoom multiplica desde esa escala base — nunca puede achicarse por debajo
+  const finalScale = baseScale * (_imgZoom / 100);
+
   img.style.width  = (img.naturalWidth  * finalScale) + 'px';
   img.style.height = (img.naturalHeight * finalScale) + 'px';
 
