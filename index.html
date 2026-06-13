@@ -207,27 +207,34 @@ footer{background:var(--g900);border-top:1px solid var(--g700);padding:40px 32px
   100%{transform:scale(1.7);opacity:0}
 }
 
-/* ── CONTROL DE POSICIÓN DE IMAGEN ── */
+/* ── CONTROL DE POSICIÓN DE IMAGEN (drag & zoom) ── */
 .img-position-wrap{margin-top:12px;display:none}
 .img-position-wrap.visible{display:block}
 .img-position-label{font-size:.72rem;font-weight:700;letter-spacing:.1em;
-  color:var(--g400);text-transform:uppercase;margin-bottom:8px;display:block}
-.img-pos-row{display:flex;gap:16px;align-items:flex-start}
-.img-pos-grid{display:grid;grid-template-columns:repeat(3,32px);
-  grid-template-rows:repeat(3,32px);gap:4px;flex-shrink:0}
-.img-pos-btn{width:32px;height:32px;border-radius:6px;border:1.5px solid var(--g600);
-  background:var(--g800);cursor:pointer;transition:all .15s;
-  display:flex;align-items:center;justify-content:center;font-size:.7rem}
-.img-pos-btn:hover{border-color:var(--yellow);background:rgba(245,196,0,.1)}
-.img-pos-btn.active{border-color:var(--yellow);background:rgba(245,196,0,.2)}
-.img-pos-preview-wrap{flex:1}
-.img-pos-preview{width:100%;height:120px;border-radius:6px;border:1.5px solid var(--g600);
-  overflow:hidden;background:var(--g800);position:relative}
-.img-pos-preview img{width:100%;height:100%;object-fit:cover;transition:object-position .2s}
-.img-zoom-wrap{margin-top:10px}
-.img-zoom-label{font-size:.7rem;color:var(--g400);margin-bottom:4px;display:flex;
-  justify-content:space-between}
-.img-zoom-slider{width:100%;accent-color:var(--yellow);cursor:pointer}
+  color:var(--g400);text-transform:uppercase;margin-bottom:8px;display:flex;
+  justify-content:space-between;align-items:center}
+.img-position-label span{font-size:.68rem;color:var(--g500);font-weight:400;
+  letter-spacing:0;text-transform:none}
+.img-drag-preview{width:100%;height:160px;border-radius:8px;
+  border:2px solid var(--g600);overflow:hidden;background:var(--g800);
+  position:relative;cursor:grab;user-select:none}
+.img-drag-preview:active{cursor:grabbing}
+.img-drag-preview.dragging{cursor:grabbing;border-color:var(--yellow)}
+.img-drag-inner{position:absolute;top:0;left:0;
+  transform-origin:0 0;will-change:transform}
+.img-drag-inner img{display:block;max-width:none;max-height:none;
+  pointer-events:none;user-select:none}
+.img-drag-hint{position:absolute;inset:0;display:flex;align-items:center;
+  justify-content:center;background:rgba(0,0,0,.4);border-radius:6px;
+  font-size:.75rem;color:rgba(255,255,255,.7);gap:6px;
+  transition:opacity .3s;pointer-events:none}
+.img-drag-preview.was-dragged .img-drag-hint{opacity:0}
+.img-zoom-wrap{margin-top:10px;display:flex;align-items:center;gap:10px}
+.img-zoom-label{font-size:.72rem;color:var(--g400);white-space:nowrap;width:36px;text-align:right}
+.img-zoom-slider{flex:1;accent-color:var(--yellow);cursor:pointer;height:4px}
+.img-zoom-reset{font-size:.7rem;color:var(--yellow);cursor:pointer;
+  white-space:nowrap;text-decoration:underline;background:none;border:none;
+  padding:0;font-family:inherit}
 
 /* ── TOAST ── */
 .toast{position:fixed;bottom:24px;right:24px;z-index:9999;
@@ -1013,36 +1020,25 @@ input,select,textarea{font-size:16px}
       <label>— o pegá una URL de imagen —</label>
       <input id="prod-img-url" type="text" placeholder="https://..." oninput="applyProdImgUrl(this.value)"/>
     </div>
-    <!-- Control de posición -->
+    <!-- Control de posición drag & zoom -->
     <div class="img-position-wrap" id="imgPosWrap">
-      <span class="img-position-label">Encuadre de la imagen</span>
-      <div class="img-pos-row">
-        <!-- Grilla 3×3 de posición -->
-        <div class="img-pos-grid" id="imgPosGrid">
-          <button class="img-pos-btn" data-pos="left top"     onclick="setPosBtn(this,'left top')"     title="Superior izquierda">↖</button>
-          <button class="img-pos-btn" data-pos="center top"   onclick="setPosBtn(this,'center top')"   title="Superior centro">↑</button>
-          <button class="img-pos-btn" data-pos="right top"    onclick="setPosBtn(this,'right top')"    title="Superior derecha">↗</button>
-          <button class="img-pos-btn" data-pos="left center"  onclick="setPosBtn(this,'left center')"  title="Centro izquierda">←</button>
-          <button class="img-pos-btn active" data-pos="center center" onclick="setPosBtn(this,'center center')" title="Centro">⊙</button>
-          <button class="img-pos-btn" data-pos="right center" onclick="setPosBtn(this,'right center')" title="Centro derecha">→</button>
-          <button class="img-pos-btn" data-pos="left bottom"  onclick="setPosBtn(this,'left bottom')"  title="Inferior izquierda">↙</button>
-          <button class="img-pos-btn" data-pos="center bottom" onclick="setPosBtn(this,'center bottom')" title="Inferior centro">↓</button>
-          <button class="img-pos-btn" data-pos="right bottom" onclick="setPosBtn(this,'right bottom')" title="Inferior derecha">↘</button>
+      <div class="img-position-label">
+        Encuadre de la imagen
+        <span>Arrastrá para reposicionar</span>
+      </div>
+      <!-- Preview draggable -->
+      <div class="img-drag-preview" id="imgDragPreview">
+        <div class="img-drag-inner" id="imgDragInner">
+          <img id="imgDragImg" src="" alt="preview" draggable="false"/>
         </div>
-        <!-- Preview en tiempo real -->
-        <div class="img-pos-preview-wrap">
-          <div class="img-pos-preview">
-            <img id="imgPosPreviewImg" src="" alt="preview"/>
-          </div>
-          <div class="img-zoom-wrap">
-            <div class="img-zoom-label">
-              <span>Zoom</span>
-              <span id="imgZoomVal">100%</span>
-            </div>
-            <input type="range" class="img-zoom-slider" id="imgZoomSlider"
-              min="100" max="200" value="100" oninput="setZoom(this.value)"/>
-          </div>
-        </div>
+        <div class="img-drag-hint">✋ Arrastrá la imagen</div>
+      </div>
+      <!-- Zoom -->
+      <div class="img-zoom-wrap">
+        <span class="img-zoom-label" id="imgZoomVal">100%</span>
+        <input type="range" class="img-zoom-slider" id="imgZoomSlider"
+          min="100" max="300" value="100" oninput="setZoom(this.value)"/>
+        <button class="img-zoom-reset" onclick="resetPosControl()">Resetear</button>
       </div>
     </div>
     <div class="admin-modal-footer">
@@ -1213,9 +1209,7 @@ function applyProducts(){
           p.img
             ? `<img src="${p.img}" alt="${p.name}"
                 style="width:100%;height:100%;object-fit:cover;display:block;
-                  object-position:${p.imgPos||'center center'};
-                  transform:scale(${(p.imgZoom||100)/100});
-                  transform-origin:${p.imgPos||'center center'}"
+                  object-position:${p.imgPos||'center center'}"
                 onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<span style=&quot;font-size:3.5rem&quot;>${p.emoji||String.fromCodePoint(0x1F4E6)}</span>')"/>`
             : `<span style="font-size:3.5rem">${p.emoji||'📦'}</span>`
         }</div>
@@ -1642,13 +1636,11 @@ function openProdModal(id){
       el('prod-img-hint').style.display = 'none';
       el('prod-img-url').value = p.img.startsWith('data:') ? '' : p.img;
       // Restaurar posición guardada
-      _imgPos = p.imgPos || 'center center';
       _imgZoom = p.imgZoom || 100;
-      document.querySelectorAll('.img-pos-btn').forEach(b=>{
-        b.classList.toggle('active', b.dataset.pos === _imgPos);
-      });
       const slider = el('imgZoomSlider');
       if(slider){ slider.value = _imgZoom; el('imgZoomVal').textContent = _imgZoom+'%'; }
+      const preview = el('imgDragPreview');
+      if(preview) preview._dragSetup = false;
       showPosControl(p.img);
     }
   } else {
@@ -1688,53 +1680,120 @@ function applyProdImgUrl(url){
     el('imgPosWrap').classList.remove('visible');
   }
 }
-// ── Control de posición de imagen ───────────────────────────────
-let _imgPos = 'center center';
+// ── Control de posición drag & zoom ─────────────────────────────
+let _dragOffsetX = 0, _dragOffsetY = 0;  // px offset de la imagen
 let _imgZoom = 100;
+let _isDragging = false, _startX = 0, _startY = 0, _startOX = 0, _startOY = 0;
 
 function showPosControl(src){
   const wrap = el('imgPosWrap');
-  const previewImg = el('imgPosPreviewImg');
-  if(src){
-    previewImg.src = src;
-    wrap.classList.add('visible');
-    applyPosToPreview();
-  } else {
-    wrap.classList.remove('visible');
-  }
+  if(!src){ wrap.classList.remove('visible'); return; }
+  const img = el('imgDragImg');
+  img.onload = () => initDragPreview();
+  img.src = src;
+  wrap.classList.add('visible');
 }
 
-function setPosBtn(btn, pos){
-  _imgPos = pos;
-  document.querySelectorAll('.img-pos-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  applyPosToPreview();
+function initDragPreview(){
+  const preview = el('imgDragPreview');
+  const inner = el('imgDragInner');
+  const img = el('imgDragImg');
+  if(!preview||!inner||!img) return;
+
+  const pw = preview.offsetWidth;
+  const ph = preview.offsetHeight;
+  const scale = _imgZoom / 100;
+  const iw = img.naturalWidth  * scale * (ph / img.naturalHeight);
+  const ih = ph;
+  // Escalar para que la imagen cubra el preview en alto
+  const finalScale = Math.max(pw / img.naturalWidth, ph / img.naturalHeight) * (_imgZoom/100);
+  img.style.width  = (img.naturalWidth  * finalScale) + 'px';
+  img.style.height = (img.naturalHeight * finalScale) + 'px';
+
+  clampOffset();
+  applyDragTransform();
+  setupDragEvents();
+}
+
+function clampOffset(){
+  const preview = el('imgDragPreview');
+  const img = el('imgDragImg');
+  if(!preview||!img) return;
+  const pw = preview.offsetWidth, ph = preview.offsetHeight;
+  const iw = parseFloat(img.style.width)||pw;
+  const ih = parseFloat(img.style.height)||ph;
+  _dragOffsetX = Math.min(0, Math.max(pw - iw, _dragOffsetX));
+  _dragOffsetY = Math.min(0, Math.max(ph - ih, _dragOffsetY));
+}
+
+function applyDragTransform(){
+  const inner = el('imgDragInner');
+  if(inner) inner.style.transform = `translate(${_dragOffsetX}px,${_dragOffsetY}px)`;
+}
+
+function setupDragEvents(){
+  const preview = el('imgDragPreview');
+  if(!preview||preview._dragSetup) return;
+  preview._dragSetup = true;
+
+  // Mouse
+  preview.addEventListener('mousedown', e=>{
+    _isDragging=true; _startX=e.clientX; _startY=e.clientY;
+    _startOX=_dragOffsetX; _startOY=_dragOffsetY;
+    preview.classList.add('dragging','was-dragged');
+    e.preventDefault();
+  });
+  window.addEventListener('mousemove', e=>{
+    if(!_isDragging) return;
+    _dragOffsetX = _startOX + (e.clientX - _startX);
+    _dragOffsetY = _startOY + (e.clientY - _startY);
+    clampOffset(); applyDragTransform();
+  });
+  window.addEventListener('mouseup', ()=>{ _isDragging=false; preview.classList.remove('dragging'); });
+
+  // Touch
+  preview.addEventListener('touchstart', e=>{
+    const t=e.touches[0];
+    _isDragging=true; _startX=t.clientX; _startY=t.clientY;
+    _startOX=_dragOffsetX; _startOY=_dragOffsetY;
+    preview.classList.add('dragging','was-dragged');
+  },{passive:true});
+  preview.addEventListener('touchmove', e=>{
+    if(!_isDragging) return;
+    const t=e.touches[0];
+    _dragOffsetX = _startOX + (t.clientX - _startX);
+    _dragOffsetY = _startOY + (t.clientY - _startY);
+    clampOffset(); applyDragTransform();
+    e.preventDefault();
+  },{passive:false});
+  preview.addEventListener('touchend', ()=>{ _isDragging=false; preview.classList.remove('dragging'); });
 }
 
 function setZoom(val){
   _imgZoom = parseInt(val);
   el('imgZoomVal').textContent = val+'%';
-  applyPosToPreview();
-}
-
-function applyPosToPreview(){
-  const img = el('imgPosPreviewImg');
-  if(!img) return;
-  img.style.objectPosition = _imgPos;
-  img.style.objectFit = 'cover';
-  // Zoom: usamos transform scale en el img
-  img.style.transform = `scale(${_imgZoom/100})`;
-  img.style.transformOrigin = _imgPos;
+  initDragPreview();
 }
 
 function resetPosControl(){
-  _imgPos = 'center center';
-  _imgZoom = 100;
-  document.querySelectorAll('.img-pos-btn').forEach(b=>{
-    b.classList.toggle('active', b.dataset.pos === 'center center');
-  });
+  _dragOffsetX = 0; _dragOffsetY = 0; _imgZoom = 100;
   const slider = el('imgZoomSlider');
   if(slider){ slider.value = 100; el('imgZoomVal').textContent = '100%'; }
+  const preview = el('imgDragPreview');
+  if(preview){ preview._dragSetup=false; preview.classList.remove('was-dragged'); }
+  initDragPreview();
+}
+
+// Convertir offset a object-position % para guardar en el producto
+function getImgPosForSave(){
+  const preview = el('imgDragPreview');
+  const img = el('imgDragImg');
+  if(!preview||!img||!img.style.width) return {pos:'center center', zoom:_imgZoom};
+  const pw=preview.offsetWidth, ph=preview.offsetHeight;
+  const iw=parseFloat(img.style.width), ih=parseFloat(img.style.height);
+  const px = iw>pw ? Math.round((-_dragOffsetX/(iw-pw))*100) : 50;
+  const py = ih>ph ? Math.round((-_dragOffsetY/(ih-ph))*100) : 50;
+  return { pos: px+'% '+py+'%', zoom: _imgZoom };
 }
 
 function saveProd(){
@@ -1750,7 +1809,7 @@ function saveProd(){
     price: el('prod-price').value.trim(),
     emoji: el('prod-emoji').value.trim(),
     img: imgSrc,
-    imgPos: _imgPos || 'center center',
+    imgPos: (()=>{ const r=getImgPosForSave(); return r.pos; })(),
     imgZoom: _imgZoom || 100
   };
   if(id){
