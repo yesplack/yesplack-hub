@@ -207,6 +207,28 @@ footer{background:var(--g900);border-top:1px solid var(--g700);padding:40px 32px
   100%{transform:scale(1.7);opacity:0}
 }
 
+/* ── CONTROL DE POSICIÓN DE IMAGEN ── */
+.img-position-wrap{margin-top:12px;display:none}
+.img-position-wrap.visible{display:block}
+.img-position-label{font-size:.72rem;font-weight:700;letter-spacing:.1em;
+  color:var(--g400);text-transform:uppercase;margin-bottom:8px;display:block}
+.img-pos-row{display:flex;gap:16px;align-items:flex-start}
+.img-pos-grid{display:grid;grid-template-columns:repeat(3,32px);
+  grid-template-rows:repeat(3,32px);gap:4px;flex-shrink:0}
+.img-pos-btn{width:32px;height:32px;border-radius:6px;border:1.5px solid var(--g600);
+  background:var(--g800);cursor:pointer;transition:all .15s;
+  display:flex;align-items:center;justify-content:center;font-size:.7rem}
+.img-pos-btn:hover{border-color:var(--yellow);background:rgba(245,196,0,.1)}
+.img-pos-btn.active{border-color:var(--yellow);background:rgba(245,196,0,.2)}
+.img-pos-preview-wrap{flex:1}
+.img-pos-preview{width:100%;height:120px;border-radius:6px;border:1.5px solid var(--g600);
+  overflow:hidden;background:var(--g800);position:relative}
+.img-pos-preview img{width:100%;height:100%;object-fit:cover;transition:object-position .2s}
+.img-zoom-wrap{margin-top:10px}
+.img-zoom-label{font-size:.7rem;color:var(--g400);margin-bottom:4px;display:flex;
+  justify-content:space-between}
+.img-zoom-slider{width:100%;accent-color:var(--yellow);cursor:pointer}
+
 /* ── TOAST ── */
 .toast{position:fixed;bottom:24px;right:24px;z-index:9999;
   background:var(--yellow);color:var(--black);font-family:var(--fd);font-weight:700;
@@ -991,6 +1013,38 @@ input,select,textarea{font-size:16px}
       <label>— o pegá una URL de imagen —</label>
       <input id="prod-img-url" type="text" placeholder="https://..." oninput="applyProdImgUrl(this.value)"/>
     </div>
+    <!-- Control de posición -->
+    <div class="img-position-wrap" id="imgPosWrap">
+      <span class="img-position-label">Encuadre de la imagen</span>
+      <div class="img-pos-row">
+        <!-- Grilla 3×3 de posición -->
+        <div class="img-pos-grid" id="imgPosGrid">
+          <button class="img-pos-btn" data-pos="left top"     onclick="setPosBtn(this,'left top')"     title="Superior izquierda">↖</button>
+          <button class="img-pos-btn" data-pos="center top"   onclick="setPosBtn(this,'center top')"   title="Superior centro">↑</button>
+          <button class="img-pos-btn" data-pos="right top"    onclick="setPosBtn(this,'right top')"    title="Superior derecha">↗</button>
+          <button class="img-pos-btn" data-pos="left center"  onclick="setPosBtn(this,'left center')"  title="Centro izquierda">←</button>
+          <button class="img-pos-btn active" data-pos="center center" onclick="setPosBtn(this,'center center')" title="Centro">⊙</button>
+          <button class="img-pos-btn" data-pos="right center" onclick="setPosBtn(this,'right center')" title="Centro derecha">→</button>
+          <button class="img-pos-btn" data-pos="left bottom"  onclick="setPosBtn(this,'left bottom')"  title="Inferior izquierda">↙</button>
+          <button class="img-pos-btn" data-pos="center bottom" onclick="setPosBtn(this,'center bottom')" title="Inferior centro">↓</button>
+          <button class="img-pos-btn" data-pos="right bottom" onclick="setPosBtn(this,'right bottom')" title="Inferior derecha">↘</button>
+        </div>
+        <!-- Preview en tiempo real -->
+        <div class="img-pos-preview-wrap">
+          <div class="img-pos-preview">
+            <img id="imgPosPreviewImg" src="" alt="preview"/>
+          </div>
+          <div class="img-zoom-wrap">
+            <div class="img-zoom-label">
+              <span>Zoom</span>
+              <span id="imgZoomVal">100%</span>
+            </div>
+            <input type="range" class="img-zoom-slider" id="imgZoomSlider"
+              min="100" max="200" value="100" oninput="setZoom(this.value)"/>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="admin-modal-footer">
       <button class="sec-btn" onclick="closeProdModal()">Cancelar</button>
       <button class="save-btn" onclick="saveProd()">Guardar producto</button>
@@ -1157,7 +1211,11 @@ function applyProducts(){
       <div class="product-card">
         <div class="product-img">${
           p.img
-            ? `<img src="${p.img}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;display:block"
+            ? `<img src="${p.img}" alt="${p.name}"
+                style="width:100%;height:100%;object-fit:cover;display:block;
+                  object-position:${p.imgPos||'center center'};
+                  transform:scale(${(p.imgZoom||100)/100});
+                  transform-origin:${p.imgPos||'center center'}"
                 onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<span style=&quot;font-size:3.5rem&quot;>${p.emoji||String.fromCodePoint(0x1F4E6)}</span>')"/>`
             : `<span style="font-size:3.5rem">${p.emoji||'📦'}</span>`
         }</div>
@@ -1583,6 +1641,15 @@ function openProdModal(id){
       el('prod-img-preview').style.display = 'block';
       el('prod-img-hint').style.display = 'none';
       el('prod-img-url').value = p.img.startsWith('data:') ? '' : p.img;
+      // Restaurar posición guardada
+      _imgPos = p.imgPos || 'center center';
+      _imgZoom = p.imgZoom || 100;
+      document.querySelectorAll('.img-pos-btn').forEach(b=>{
+        b.classList.toggle('active', b.dataset.pos === _imgPos);
+      });
+      const slider = el('imgZoomSlider');
+      if(slider){ slider.value = _imgZoom; el('imgZoomVal').textContent = _imgZoom+'%'; }
+      showPosControl(p.img);
     }
   } else {
     el('prod-modal-title').textContent = 'Agregar producto';
@@ -1605,6 +1672,8 @@ function handleProdImgUpload(input){
     el('prod-img-preview').style.display = 'block';
     el('prod-img-hint').style.display = 'none';
     el('prod-img-url').value = '';
+    resetPosControl();
+    showPosControl(e.target.result);
   };
   reader.readAsDataURL(file);
 }
@@ -1613,8 +1682,61 @@ function applyProdImgUrl(url){
     el('prod-img-preview').src = url;
     el('prod-img-preview').style.display = 'block';
     el('prod-img-hint').style.display = 'none';
+    resetPosControl();
+    showPosControl(url);
+  } else {
+    el('imgPosWrap').classList.remove('visible');
   }
 }
+// ── Control de posición de imagen ───────────────────────────────
+let _imgPos = 'center center';
+let _imgZoom = 100;
+
+function showPosControl(src){
+  const wrap = el('imgPosWrap');
+  const previewImg = el('imgPosPreviewImg');
+  if(src){
+    previewImg.src = src;
+    wrap.classList.add('visible');
+    applyPosToPreview();
+  } else {
+    wrap.classList.remove('visible');
+  }
+}
+
+function setPosBtn(btn, pos){
+  _imgPos = pos;
+  document.querySelectorAll('.img-pos-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  applyPosToPreview();
+}
+
+function setZoom(val){
+  _imgZoom = parseInt(val);
+  el('imgZoomVal').textContent = val+'%';
+  applyPosToPreview();
+}
+
+function applyPosToPreview(){
+  const img = el('imgPosPreviewImg');
+  if(!img) return;
+  img.style.objectPosition = _imgPos;
+  img.style.objectFit = 'cover';
+  // Zoom: usamos transform scale en el img
+  img.style.transform = `scale(${_imgZoom/100})`;
+  img.style.transformOrigin = _imgPos;
+}
+
+function resetPosControl(){
+  _imgPos = 'center center';
+  _imgZoom = 100;
+  document.querySelectorAll('.img-pos-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.pos === 'center center');
+  });
+  const slider = el('imgZoomSlider');
+  if(slider){ slider.value = 100; el('imgZoomVal').textContent = '100%'; }
+}
+
 function saveProd(){
   const prods = getData('products', DEFAULT_PRODUCTS);
   const id = el('prod-edit-id').value;
@@ -1627,7 +1749,9 @@ function saveProd(){
     desc: el('prod-desc').value.trim(),
     price: el('prod-price').value.trim(),
     emoji: el('prod-emoji').value.trim(),
-    img: imgSrc
+    img: imgSrc,
+    imgPos: _imgPos || 'center center',
+    imgZoom: _imgZoom || 100
   };
   if(id){
     const idx = prods.findIndex(x=>x.id===id);
